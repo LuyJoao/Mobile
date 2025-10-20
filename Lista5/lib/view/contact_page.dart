@@ -25,7 +25,7 @@ class _ContactPageState extends State<ContactPage> {
   final ImagePicker _picker = ImagePicker();
   final phoneMask = MaskTextInputFormatter(
       mask: '(##) #####-####',
-      filter: {"#": RegExp(r'[0-9]')}); // Sintaxe da RegExp corrigida
+      filter: {"#": RegExp(r'[0-9]')});
 
   @override
   void initState() {
