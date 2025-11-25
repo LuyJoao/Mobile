@@ -22,7 +22,6 @@ class _ComputerFormPageState extends State<ComputerFormPage> {
   final _formKey = GlobalKey<FormState>();
   final DatabaseHelper _dbHelper = DatabaseHelper();
   
-  // Controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _processorController = TextEditingController();
   final TextEditingController _ramController = TextEditingController();
@@ -87,7 +86,6 @@ class _ComputerFormPageState extends State<ComputerFormPage> {
       final savedImage = await image.copy('${appDir.path}/$fileName');
       return savedImage.path;
     } catch (e) {
-      print('Erro ao salvar imagem permanentemente: $e');
       return null;
     }
   }
@@ -302,7 +300,10 @@ class _ComputerFormPageState extends State<ComputerFormPage> {
                   backgroundColor: theme.primaryColor,
                   foregroundColor: Colors.white,
                 ),
-                child: Text(widget.computer?.isComplete == false ? 'FINALIZAR RASCUNHO' : 'SALVAR/ATUALIZAR PC', style: theme.textTheme.labelLarge),
+                child: Text(
+                  widget.computer?.isComplete == false ? 'FINALIZAR RASCUNHO' : 'SALVAR/ATUALIZAR PC', 
+                  style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
+                ),
               ),
             ],
           ),
