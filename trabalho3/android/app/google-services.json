@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "21072315754",
+    "project_id": "trabalho3-3eced",
+    "storage_bucket": "trabalho3-3eced.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:21072315754:android:811fe4c56e2751217a1113",
+        "android_client_info": {
+          "package_name": "com.example.trabalho3"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvrNPgzptDarNYJtIcUvv2lb9QgOrRPZY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
