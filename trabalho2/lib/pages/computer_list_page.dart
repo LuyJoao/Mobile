@@ -41,10 +41,42 @@ class _ComputerListPageState extends State<ComputerListPage> {
     }
   }
 
-  void _deleteComputer(int id) async {
+  void _executeDelete(int id) async {
     await _dbHelper.deleteComputer(id);
     _refreshComputerList();
     _showMessage('Computador deletado com sucesso!');
+  }
+  
+  void _confirmDelete(Computer computer) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          title: const Text('Confirmar Exclusão'),
+          content: Text('Tem certeza que deseja excluir o computador "${computer.name}"? Esta ação não pode ser desfeita.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar', style: TextStyle(color: Theme.of(context).primaryColor)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Excluir'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _executeDelete(computer.id!);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showMessage(String message) {
@@ -59,96 +91,102 @@ class _ComputerListPageState extends State<ComputerListPage> {
 
       if (imageFile.existsSync()) {
         return ClipRRect(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(10.0),
           child: Image.file(
             imageFile,
-            width: 50,
-            height: 50,
+            width: 70,
+            height: 70,
             fit: BoxFit.cover,
-            errorBuilder: (c, e, s) => Icon(Icons.desktop_windows, size: 40, color: theme.primaryColor),
+            errorBuilder: (c, e, s) =>
+                Icon(Icons.desktop_windows, size: 50, color: theme.primaryColor),
           ),
         );
       }
     }
-    
-    return Icon(
-      Icons.desktop_windows, 
-      size: 40, 
-      color: theme.primaryColor,
+
+    return Container(
+      width: 70,
+      height: 70,
+      decoration: BoxDecoration(
+        color: theme.primaryColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Icon(
+        Icons.desktop_windows_rounded,
+        size: 45,
+        color: theme.primaryColor,
+      ),
     );
   }
-  // -----------------------------------------------
 
   Widget _buildComputerCard(Computer computer, ThemeData theme) {
     final isComplete = computer.isComplete;
 
     return Card(
-      elevation: 4, 
-      margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 10.0),
+      elevation: 6,
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        
-        leading: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8.0),
-            color: (computer.imagePath == null || computer.imagePath!.isEmpty) 
-                ? theme.primaryColor.withOpacity(0.15) 
-                : Colors.transparent,
-          ),
-          child: _buildComputerImage(computer, theme),
-        ),
-        
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                computer.name,
-                style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (!isComplete)
-              const Padding(
-                padding: EdgeInsets.only(left: 8.0),
-                child: Icon(Icons.warning, color: Colors.amber, size: 20),
-              ),
-          ],
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: Column(
+      child: InkWell(
+        onTap: () => _navigateToForm(computer: computer),
+        borderRadius: BorderRadius.circular(15.0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'CPU: ${computer.processor} | RAM: ${computer.ram}',
-                style: theme.textTheme.bodyMedium,
-              ),
-              if (!isComplete)
-                Text(
-                  'STATUS: FALTA FINALIZAR!',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red.shade700, fontWeight: FontWeight.w600),
+              _buildComputerImage(computer, theme),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      computer.name,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                        color: theme.primaryColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      'CPU: ${computer.processor}',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    Text(
+                      'RAM: ${computer.ram}',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 5),
+                    if (!isComplete)
+                      Text(
+                        'RASCUNHO: Falta Finalizar',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.red.shade700,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                  ],
                 ),
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit_note_rounded, color: theme.colorScheme.secondary, size: 28),
+                    tooltip: 'Editar',
+                    onPressed: () => _navigateToForm(computer: computer),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 28),
+                    tooltip: 'Deletar',
+                    onPressed: () => _confirmDelete(computer),
+                  ),
+                ],
+              ),
             ],
           ),
-        ),
-        
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit, color: Colors.green),
-              tooltip: 'Editar',
-              onPressed: () => _navigateToForm(computer: computer),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              tooltip: 'Deletar',
-              onPressed: () => _deleteComputer(computer.id!),
-            ),
-          ],
         ),
       ),
     );
@@ -157,7 +195,11 @@ class _ComputerListPageState extends State<ComputerListPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final List<String> statusFilterOptions = ['Todos os Status', 'Completo', 'Rascunho'];
+    final List<String> statusFilterOptions = [
+      'Todos os Status',
+      'Completo',
+      'Rascunho'
+    ];
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -171,7 +213,9 @@ class _ComputerListPageState extends State<ComputerListPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Erro ao carregar dados: ${snapshot.error}'));
+            return Center(
+              child: Text('Erro ao carregar dados: ${snapshot.error}'),
+            );
           } else if (!snapshot.hasData) {
             return const Center(child: Text('Erro: Dados não disponíveis.'));
           }
@@ -185,9 +229,10 @@ class _ComputerListPageState extends State<ComputerListPage> {
             }
             return true;
           }).toList();
-          
+
           final totalBuilds = allComputers.length;
-          final incompleteBuilds = allComputers.where((c) => c.isComplete == false).length;
+          final incompleteBuilds =
+              allComputers.where((c) => c.isComplete == false).length;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,40 +241,41 @@ class _ComputerListPageState extends State<ComputerListPage> {
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
-                    Expanded(child: _buildSummaryCard(
-                      theme, 
-                      'Total de Builds', 
-                      totalBuilds.toString(), 
-                      Icons.storage_rounded,
-                      Colors.blueAccent
-                    )),
-                    const SizedBox(width: 10),
-                    Expanded(child: _buildSummaryCard(
-                      theme, 
-                      'Rascunhos', 
-                      incompleteBuilds.toString(), 
-                      Icons.warning_amber_rounded,
-                      Colors.orange
-                    )),
+                    Expanded(
+                      child: _buildSummaryCard(
+                        theme,
+                        'Total de Builds',
+                        totalBuilds.toString(),
+                        Icons.storage_rounded,
+                        theme.primaryColor,
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: _buildSummaryCard(
+                        theme,
+                        'Rascunhos',
+                        incompleteBuilds.toString(),
+                        Icons.warning_amber_rounded,
+                        Colors.orange.shade700,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 8.0),
                 child: DropdownButtonFormField<String>(
                   value: _selectedStatusFilter,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Filtrar por Status',
-                    prefixIcon: const Icon(Icons.filter_list),
-                    fillColor: Colors.white,
-                    filled: true,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                    prefixIcon: Icon(Icons.filter_list_rounded),
                   ),
                   items: statusFilterOptions.map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text(value),
+                      child: Text(value, style: theme.textTheme.bodyLarge),
                     );
                   }).toList(),
                   onChanged: (newValue) {
@@ -239,19 +285,30 @@ class _ComputerListPageState extends State<ComputerListPage> {
                   },
                 ),
               ),
-
               Expanded(
                 child: filteredComputers.isEmpty && totalBuilds > 0
-                  ? Center(child: Text('Nenhum build encontrado com o filtro atual.', style: theme.textTheme.bodyMedium))
-                  : filteredComputers.isEmpty
-                    ? Center(child: Text('Nenhum computador cadastrado. Adicione um novo!', style: theme.textTheme.bodyMedium))
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 0),
-                        itemCount: filteredComputers.length,
-                        itemBuilder: (context, index) {
-                          return _buildComputerCard(filteredComputers[index], theme);
-                        },
-                      ),
+                    ? Center(
+                        child: Text(
+                          'Nenhum build encontrado com o filtro atual.',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      )
+                    : filteredComputers.isEmpty
+                        ? Center(
+                            child: Text(
+                              'Nenhum computador cadastrado. Adicione um novo!',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 0, vertical: 10.0),
+                            itemCount: filteredComputers.length,
+                            itemBuilder: (context, index) {
+                              return _buildComputerCard(
+                                  filteredComputers[index], theme);
+                            },
+                          ),
               ),
             ],
           );
@@ -260,33 +317,39 @@ class _ComputerListPageState extends State<ComputerListPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToForm(),
         tooltip: 'Adicionar Novo PC',
-        child: const Icon(Icons.add),
+        backgroundColor: theme.colorScheme.secondary,
+        child: const Icon(Icons.add_rounded, color: Colors.white),
       ),
     );
   }
-  
-  Widget _buildSummaryCard(ThemeData theme, String title, String value, IconData icon, Color iconColor) {
+
+  Widget _buildSummaryCard(
+      ThemeData theme, String title, String value, IconData icon, Color iconColor) {
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(title, style: theme.textTheme.bodyMedium),
-                Icon(icon, color: iconColor, size: 24),
+                Text(title, style: theme.textTheme.titleMedium?.copyWith(
+                  color: Colors.grey.shade600,
+                  fontSize: 14
+                )),
+                Icon(icon, color: iconColor, size: 28),
               ],
             ),
             const SizedBox(height: 8),
             Text(
               value,
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontSize: 28, 
-                color: theme.primaryColor,
+              style: theme.textTheme.headlineLarge?.copyWith(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                color: iconColor,
               ),
             ),
           ],

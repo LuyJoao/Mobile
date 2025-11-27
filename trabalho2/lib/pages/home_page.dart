@@ -7,10 +7,11 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Menu Principal'),
-        backgroundColor: Theme.of(context).primaryColor,
+        title: Text('Menu Principal', style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -23,24 +24,24 @@ class HomePage extends StatelessWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         children: <Widget>[
           _buildMenuItem(
             context,
             title: 'Meus PCs Cadastrados',
             subtitle: 'Gerencie e visualize seus builds salvos (CRUD Local).',
-            icon: Icons.storage,
-            color: Colors.blueGrey.shade700,
+            icon: Icons.computer_rounded,
+            iconColor: theme.primaryColor,
             targetPage: const ComputerListPage(),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 25), 
           
           _buildMenuItem(
             context,
             title: 'Recomendações de Builds',
             subtitle: 'Sugestões para jogos, trabalho e renderização.',
-            icon: Icons.lightbulb_outline,
-            color: Colors.green.shade700,
+            icon: Icons.auto_fix_high_rounded,
+            iconColor: theme.colorScheme.secondary,
             targetPage: const RecommendationPage(),
           ),
         ],
@@ -53,12 +54,16 @@ class HomePage extends StatelessWidget {
     required String title,
     required String subtitle,
     required IconData icon,
-    required Color color,
+    required Color iconColor,
     required Widget targetPage,
   }) {
+    final theme = Theme.of(context);
     return Card(
       elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: BorderSide(color: iconColor.withOpacity(0.3), width: 1.5), 
+      ),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -68,10 +73,10 @@ class HomePage extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(15),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(25.0),
           child: Row(
             children: <Widget>[
-              Icon(icon, size: 35, color: color),
+              Icon(icon, size: 40, color: iconColor), 
               const SizedBox(width: 20),
               Expanded(
                 child: Column(
@@ -79,17 +84,22 @@ class HomePage extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: theme.primaryColor,
+                      ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
                       subtitle,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
+              Icon(Icons.arrow_forward_ios_rounded, size: 18, color: theme.primaryColor),
             ],
           ),
         ),

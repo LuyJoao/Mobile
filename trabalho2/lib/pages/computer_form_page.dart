@@ -121,7 +121,7 @@ class _ComputerFormPageState extends State<ComputerFormPage> {
     final bool isCompleteStatus = _caseModelController.text.isNotEmpty && 
                                   _motherboardController.text.isNotEmpty &&
                                   _powerSupplyController.text.isNotEmpty;
-                                    
+                                  
     String? finalImagePath = _savedImagePath; 
     
     if (_pickedImage != null && _savedImagePath == null) {
@@ -181,166 +181,125 @@ class _ComputerFormPageState extends State<ComputerFormPage> {
     _hdCountController.dispose();
     super.dispose();
   }
-
-  @override
-  Widget build(BuildContext context) {
-    final String title = widget.computer == null ? 'Adicionar Computador' : 'Editar Computador';
+  Widget _buildSection(BuildContext context, {required String title, required List<Widget> children, bool optional = false}) {
     final theme = Theme.of(context);
-
-    final fieldsToCompleteBuild = [
-      {'controller': _caseModelController, 'label': 'Gabinete (Obrigatório para Finalizar)', 'hint': 'Ex: Cooler Master'},
-      {'controller': _motherboardController, 'label': 'Placa Mãe (Obrigatório para Finalizar)', 'hint': 'Ex: ASUS Z790'},
-      {'controller': _powerSupplyController, 'label': 'Fonte (Obrigatório para Finalizar)', 'hint': 'Ex: 750W 80+ Gold'},
-    ];
-
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: theme.appBarTheme.backgroundColor,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  alignment: Alignment.center,
-                  child: _pickedImage != null
-                      ? Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Image.file(_pickedImage!, fit: BoxFit.cover, width: double.infinity, height: double.infinity)
-                            ),
-                            Positioned(
-                              top: 5,
-                              right: 5,
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _pickedImage = null;
-                                    _savedImagePath = null;
-                                  });
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.black54,
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  padding: const EdgeInsets.all(5),
-                                  child: const Icon(Icons.close, color: Colors.white, size: 20),
-                                ),
-                              ),
-                            ),
-                          ],
-                        )
-                      : Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.camera_alt, size: 50, color: Colors.grey[600]),
-                            const Text('Adicionar Foto do PC', style: TextStyle(color: Colors.grey)),
-                          ],
-                        ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 25.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.primaryColor,
                 ),
               ),
-              const SizedBox(height: 20),
-              
-              _buildTextField(_nameController, 'Nome do PC', 'Ex: Estação de Trabalho', 'Informe o nome do PC'),
-              _buildTextField(_processorController, 'Processador', 'Ex: i7-13700K', 'Informe o Processador'),
-              _buildTextField(_ramController, 'Memória RAM', 'Ex: 32GB DDR5', 'Informe a RAM'),
-              _buildTextField(_gpuController, 'Placa de Vídeo', 'Ex: RTX 4070', 'Informe a GPU'),
-              const SizedBox(height: 20),
-              
-              ...fieldsToCompleteBuild.map((f) => _buildOptionalTextField(
-                f['controller'] as TextEditingController, f['label'] as String, f['hint'] as String)
-              ).toList(),
-              
-              const SizedBox(height: 20),
-
-              _buildDropdownField('Sistema Operacional', _selectedOS, osOptions, (String? newValue) {
-                setState(() {
-                  _selectedOS = newValue!;
-                });
-              }),
-              const SizedBox(height: 20),
-
-              _buildDropdownField('Tipo de Armazenamento', _selectedStorageType, storageOptions, (String? newValue) {
-                setState(() {
-                  _selectedStorageType = newValue!;
-                });
-              }),
-              const SizedBox(height: 20),
-
-              if (_selectedStorageType == 'SSD' || _selectedStorageType == 'Ambos')
-                _buildNumberField(_ssdCountController, 'Quantidade de SSDs', '0', 'Informe a quantidade de SSDs'),
-
-              if (_selectedStorageType == 'HD' || _selectedStorageType == 'Ambos')
-                _buildNumberField(_hdCountController, 'Quantidade de HDs', '0', 'Informe a quantidade de HDs'),
-              
-              const SizedBox(height: 30),
-
-              ElevatedButton(
-                onPressed: _saveComputer,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  backgroundColor: theme.primaryColor,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text(
-                  widget.computer?.isComplete == false ? 'FINALIZAR RASCUNHO' : 'SALVAR/ATUALIZAR PC', 
-                  style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
-                ),
-              ),
+              if (optional) ...[
+                const SizedBox(width: 8),
+                Icon(Icons.warning_amber_rounded, size: 18, color: Colors.orange.shade600),
+              ],
             ],
           ),
-        ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              children: children,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, String hint, String validationMsg) {
+  Widget _buildImagePicker(BuildContext context) {
+    return GestureDetector(
+      onTap: _pickImage,
+      child: Container(
+        height: 200,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: Colors.grey.shade300, width: 2),
+        ),
+        alignment: Alignment.center,
+        child: _pickedImage != null
+            ? Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.file(
+                      _pickedImage!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _pickedImage = null;
+                          _savedImagePath = null;
+                        });
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: const EdgeInsets.all(5),
+                        child: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.photo_camera_rounded, size: 50, color: Theme.of(context).primaryColor.withOpacity(0.6)),
+                  const SizedBox(height: 5),
+                  Text('Adicionar Foto do PC', style: TextStyle(color: Theme.of(context).primaryColor.withOpacity(0.6), fontWeight: FontWeight.w600)),
+                ],
+              ),
+      ),
+    );
+  }
+
+
+  Widget _buildTextField(TextEditingController controller, String label, String hint, String validationMsg, {required bool required}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15.0),
       child: TextFormField(
         controller: controller,
         decoration: InputDecoration(
-          labelText: label,
+          labelText: label + (required ? ' *' : ''),
           hintText: hint,
         ),
         validator: (value) {
-          if (value == null || value.isEmpty) {
-            return validationMsg;
+          if (required && (value == null || value.isEmpty)) {
+            return validationMsg.isNotEmpty ? validationMsg : 'Este campo é obrigatório.';
           }
           return null;
         },
-      ),
-    );
-  }
-  
-  Widget _buildOptionalTextField(TextEditingController controller, String label, String hint) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15.0),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-        ),
-        validator: (value) => null, 
       ),
     );
   }
@@ -356,9 +315,7 @@ class _ComputerFormPageState extends State<ComputerFormPage> {
           hintText: hint,
         ),
         validator: (value) {
-          if (value == null || value.isEmpty) {
-            return null;
-          }
+          if (value == null || value.isEmpty) { return null; }
           if (int.tryParse(value) == null) {
             return 'Por favor, insira um número inteiro válido.';
           }
@@ -377,22 +334,110 @@ class _ComputerFormPageState extends State<ComputerFormPage> {
       orElse: () => items.first,
     );
 
-    return InputDecorator(
+    return DropdownButtonFormField<String>(
+      value: effectiveValue, 
+      isExpanded: true,
       decoration: InputDecoration(
         labelText: label,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
       ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: effectiveValue, 
-          isExpanded: true,
-          items: items.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-          onChanged: onChanged,
+      items: items.map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value, style: Theme.of(context).textTheme.bodyLarge),
+        );
+      }).toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String title = widget.computer == null ? 'Adicionar Computador' : 'Editar Computador';
+    final theme = Theme.of(context);
+
+    final fieldsToCompleteBuild = [
+      {'controller': _caseModelController, 'label': 'Gabinete', 'hint': 'Ex: Cooler Master'},
+      {'controller': _motherboardController, 'label': 'Placa Mãe', 'hint': 'Ex: ASUS Z790'},
+      {'controller': _powerSupplyController, 'label': 'Fonte', 'hint': 'Ex: 750W 80+ Gold'},
+    ];
+
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Form(
+          key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              _buildImagePicker(context),
+              const SizedBox(height: 30),
+              _buildSection(
+                context,
+                title: 'Componentes Chave',
+                children: [
+                  _buildTextField(_nameController, 'Nome do PC', 'Ex: Estação de Trabalho', 'Informe o nome do PC', required: true),
+                  _buildTextField(_processorController, 'Processador', 'Ex: i7-13700K', 'Informe o Processador', required: true),
+                  _buildTextField(_ramController, 'Memória RAM', 'Ex: 32GB DDR5', 'Informe a RAM', required: true),
+                  _buildTextField(_gpuController, 'Placa de Vídeo', 'Ex: RTX 4070', 'Informe a GPU', required: true),
+                ],
+              ),
+              _buildSection(
+                context,
+                title: 'Detalhes do Gabinete',
+                optional: true,
+                children: [
+                  Text(
+                    'Estes campos são opcionais, mas são necessários para que o build seja marcado como COMPLETO.',
+                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.orange.shade600),
+                  ),
+                  const SizedBox(height: 10),
+                  ...fieldsToCompleteBuild.map((f) => _buildTextField(
+                    f['controller'] as TextEditingController, f['label'] as String, f['hint'] as String, '', required: false)
+                  ).toList(),
+                ],
+              ),
+              _buildSection(
+                context,
+                title: 'Configurações de Software e Storage',
+                children: [
+                  _buildDropdownField('Sistema Operacional', _selectedOS, osOptions, (String? newValue) {
+                    setState(() { _selectedOS = newValue!; });
+                  }),
+                  const SizedBox(height: 20),
+                  _buildDropdownField('Tipo de Armazenamento', _selectedStorageType, storageOptions, (String? newValue) {
+                    setState(() { _selectedStorageType = newValue!; });
+                  }),
+                  const SizedBox(height: 20),
+
+                  if (_selectedStorageType == 'SSD' || _selectedStorageType == 'Ambos')
+                    _buildNumberField(_ssdCountController, 'Quantidade de SSDs', '0', 'Informe a quantidade de SSDs'),
+
+                  if (_selectedStorageType == 'HD' || _selectedStorageType == 'Ambos')
+                    _buildNumberField(_hdCountController, 'Quantidade de HDs', '0', 'Informe a quantidade de HDs'),
+                ],
+              ),
+              
+              const SizedBox(height: 30),
+
+              ElevatedButton.icon(
+                onPressed: _saveComputer,
+                icon: Icon(widget.computer == null || widget.computer?.isComplete == false ? Icons.check_circle_outline_rounded : Icons.save_rounded),
+                label: Text(
+                  widget.computer == null || widget.computer?.isComplete == false ? 'FINALIZAR RASCUNHO' : 'SALVAR/ATUALIZAR PC', 
+                  style: theme.textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.secondary,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -19,7 +19,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
       'gpu': 'NVIDIA RTX 3050 (8GB)',
       'ram': '16 GB DDR4 3200MHz',
       'details': 'Roda jogos populares em 1080p com taxas de quadros confortáveis. Baixo custo.',
-      'color': '#4CAF50', // Verde
+      'color': 0xFF4CAF50,
       'os': 'Windows 10 Home',
       'storage_type': 'SSD',
       'ssd_count': 1,
@@ -33,7 +33,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
       'gpu': 'Integrada (Radeon Vega 7)',
       'ram': '16 GB DDR4 3200MHz (Dual Channel)',
       'details': 'Excelente para jogos leves sem a necessidade de placa de vídeo dedicada. Baixíssimo custo inicial.',
-      'color': '#4CAF50', // Verde
+      'color': 0xFF4CAF50, 
       'os': 'Windows 10 Home',
       'storage_type': 'SSD',
       'ssd_count': 1,
@@ -47,7 +47,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
       'gpu': 'NVIDIA RTX 4060 (8GB)',
       'ram': '32 GB DDR4 3600MHz',
       'details': 'Foco em performance estável em 1080p Ultra. Boa margem para multitarefa.',
-      'color': '#FFC107', // Amarelo
+      'color': 0xFFFFC107,
       'os': 'Windows 11 Home',
       'storage_type': 'SSD',
       'ssd_count': 1,
@@ -61,7 +61,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
       'gpu': 'AMD Radeon RX 7600 (8GB)',
       'ram': '32 GB DDR5 5600MHz',
       'details': 'Plataforma moderna (AM5) com ótimo custo-benefício para games AAA.',
-      'color': '#FFC107', // Amarelo
+      'color': 0xFFFFC107, 
       'os': 'Windows 11 Home',
       'storage_type': 'SSD',
       'ssd_count': 1,
@@ -75,7 +75,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
       'gpu': 'NVIDIA RTX 4070 Ti (12GB)',
       'ram': '32 GB DDR5 6000MHz',
       'details': 'Máxima performance para 1440p High Refresh Rate e 4K. Ideal para stream e criadores.',
-      'color': '#D32F2F', // Vermelho
+      'color': 0xFFD32F2F,
       'os': 'Windows 11 Pro',
       'storage_type': 'SSD e HD',
       'ssd_count': 2,
@@ -89,7 +89,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
       'gpu': 'AMD Radeon RX 7800 XT (16GB)',
       'ram': '64 GB DDR5 6000MHz',
       'details': 'Alto número de núcleos e VRAM para resoluções extremas e multitarefas pesadas.',
-      'color': '#D32F2F', // Vermelho
+      'color': 0xFFD32F2F, 
       'os': 'Windows 11 Pro',
       'storage_type': 'SSD e HD',
       'ssd_count': 2,
@@ -103,7 +103,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
       'gpu': 'NVIDIA RTX 3060 (12GB)',
       'ram': '32 GB DDR5 6000MHz',
       'details': 'Ótimo equilíbrio entre núcleos e VRAM para máquinas virtuais, compilação de código e trabalho gráfico. Foco em estabilidade Linux.',
-      'color': '#1976D2', // Azul Escuro
+      'color': 0xFF1976D2,
       'os': 'Linux (Ubuntu/Pop!_OS)',
       'storage_type': 'SSD',
       'ssd_count': 1,
@@ -112,6 +112,15 @@ class _RecommendationPageState extends State<RecommendationPage> {
       'power_supply': '750W 80 Plus Gold',
     },
   ];
+
+  final Map<String, IconData> componentIcons = const {
+    'Processador': Icons.memory_rounded,
+    'Placa de Vídeo': Icons.developer_board_rounded,
+    'Memória RAM': Icons.dvr_rounded,
+    'Sistema Operacional': Icons.devices_other_rounded,
+    'Fonte': Icons.power_rounded,
+    'Armazenamento': Icons.storage_rounded,
+  };
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -147,21 +156,25 @@ class _RecommendationPageState extends State<RecommendationPage> {
     }
   }
 
-  Widget _buildDetailRow(BuildContext context, IconData icon, String label, String value) {
+  Widget _buildDetailRow(BuildContext context, String label, String value) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Theme.of(context).hintColor),
-          const SizedBox(width: 10),
+          Icon(componentIcons[label], size: 22, color: theme.primaryColor),
+          const SizedBox(width: 12),
           Text(
             '$label: ',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, fontSize: 16),
           ),
           Expanded(
             child: Text(
               value,
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w400,
+                color: Colors.grey.shade700
+              ),
             ),
           ),
         ],
@@ -178,49 +191,67 @@ class _RecommendationPageState extends State<RecommendationPage> {
         title: const Text('Recomendações de Builds'),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         children: recommendations.map((rec) {
-          final color = Color(int.parse(rec['color']!.substring(1, 7), radix: 16) + 0xFF000000);
+          final color = Color(rec['color']!);
           return Card(
-            elevation: 4,
-            margin: const EdgeInsets.only(bottom: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            elevation: 8,
+            margin: const EdgeInsets.only(bottom: 25),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+              side: BorderSide(color: color.withOpacity(0.5), width: 2),
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     rec['title']!,
-                    style: theme.textTheme.headlineMedium?.copyWith(color: color, fontSize: 20),
+                    style: theme.textTheme.headlineSmall?.copyWith(color: color, fontWeight: FontWeight.w900, fontSize: 22),
                   ),
-                  const Divider(),
+                  const SizedBox(height: 10),
+                  
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Column(
+                      children: [
+                        _buildDetailRow(context, 'Processador', rec['cpu']),
+                        _buildDetailRow(context, 'Placa de Vídeo', rec['gpu']),
+                        _buildDetailRow(context, 'Memória RAM', rec['ram']),
+                        _buildDetailRow(context, 'Sistema Operacional', rec['os']),
+                        _buildDetailRow(context, 'Fonte', rec['power_supply']),
+                        _buildDetailRow(context, 'Armazenamento', '${rec['ssd_count']}x SSD / ${rec['hd_count']}x HD'),
+                      ],
+                    ),
+                  ),
+                  
+                  const Divider(height: 30, thickness: 1.5),
 
-                  _buildDetailRow(context, Icons.speed, 'Processador', rec['cpu']),
-                  _buildDetailRow(context, Icons.developer_board, 'Placa de Vídeo', rec['gpu']),
-                  _buildDetailRow(context, Icons.memory, 'Memória RAM', rec['ram']),
-                  _buildDetailRow(context, Icons.computer, 'Sistema Operacional', rec['os']),
-                  _buildDetailRow(context, Icons.electric_bolt, 'Fonte', rec['power_supply']),
-                  _buildDetailRow(context, Icons.sd_storage, 'Armazenamento', '${rec['ssd_count']}x SSD / ${rec['hd_count']}x HD'),
-
-                  const SizedBox(height: 12),
+                  Text(
+                    'Detalhes:',
+                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.grey.shade700),
+                  ),
+                  const SizedBox(height: 5),
                   
                   Text(
                     rec['details']!,
-                    style: theme.textTheme.bodyMedium,
+                    style: theme.textTheme.bodyLarge,
                   ),
-
-                  const SizedBox(height: 12),
+                  
+                  const SizedBox(height: 20),
 
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton.icon(
                       onPressed: () => _saveRecommendation(rec),
-                      icon: const Icon(Icons.save),
+                      icon: const Icon(Icons.add_task_rounded, size: 20),
                       label: const Text('Salvar Build como Rascunho'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: color, 
+                        backgroundColor: color,
                         foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                        textStyle: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),
